@@ -1,44 +1,20 @@
 import { cardsData } from "@/src/lib/types";
 import React from "react";
+import { rewardsData } from "@/src/lib/data";
 
 type Props = {};
 
 const Rewards = (props: Props) => {
-  const data = [
-    {
-      tier: "1",
-      rewards: [
-        "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Saepe,fugit!",
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Corrupti, molestiae!",
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia,temporibus.",
-      ],
-    },
-    {
-      tier: "2",
-      rewards: [
-        "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Saepe,fugit!",
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Corrupti, molestiae!",
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia,temporibus.",
-      ],
-    },
-    {
-      tier: "3",
-      rewards: [
-        "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Saepe,fugit!",
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Corrupti, molestiae!",
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia,temporibus.",
-      ],
-    },
-  ];
-
   return (
     <div className="flex flex-col items-center my-7">
       <div>
         <h1 className="font-bold text-5xl">Rewards</h1>
       </div>
       <div className="flex w-screen mx-auto justify-evenly flex-wrap">
-        {data.length !== 0
-          ? data.map((data) => <Card tier={data.tier} rewards={data.rewards} />)
+        {rewardsData.length !== 0
+          ? rewardsData.map((data, index) => (
+              <Card key={index} tier={data.tier} rewards={data.rewards} />
+            ))
           : null}
       </div>
     </div>

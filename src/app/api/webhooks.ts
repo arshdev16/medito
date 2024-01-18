@@ -1,59 +1,68 @@
+import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import getRawBody from "raw-body";
-import { z } from "zod";
-import { NextApiResponse } from "next";
-import { NextRequest, NextResponse } from "next/server";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-const endpointsecret = process.env.WEBHOOK_SECRET as string;
-
-export const config = {
-  api: { bodyParser: false },
-};
-
-const bodySchema = z.object({
-  amount: z.number().int().gte(1),
-  //   currency: z.enum(possibleCurrencies),
-  //   interval: z.enum(possibleIntervals),
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: "2023-10-16",
 });
 
-type reqBody = z.infer<typeof bodySchema>;
+const endpointSecret = process.env.WEBHOOK_SECRET as string;
 
-export async function POST(req: Request) {
-  const body = (await req.json()) as reqBody;
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-  //use zod to check the body of the request before proceeding
-  let parseRes;
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
-    parseRes = bodySchema.parse(body);
-  } catch (error) {
-    return NextResponse.json({ error });
-  }
+    console.log("req.headers", req.headers);
+    if (req.method !== "POST")
+      return res.status(405).send("Only POST requests allowed");
 
-  const origin = req.headers.get("origin") || "http://localhost:3000";
-  const success_url = `${origin}/thankyou`;
-  const cancel_url = `${origin}/cancel`;
+    const sig: any = req.headers["stripe-signature"];
+    const rawBody = await getRawBody(req);
 
-  try {
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          price_data: {
-            currency: "USD",
-            recurring: undefined,
-            unit_amount: body.amount * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      success_url,
-      cancel_url,
-    });
-    return NextResponse.json(session);
-  } catch (error) {
-    if (error instanceof Stripe.errors.StripeError) {
-      const { message } = error;
-      return NextResponse.json({ message }, { status: error.statusCode });
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
+    } catch (err: any) {
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    console.log("event.type", JSON.stringify(event.type));
+
+    if (event.type === "checkout.session.completed") {
+      const sessionWithLineItems = await stripe.checkout.sessions.retrieve(
+        (event.data.object as any).id,
+        {
+          expand: ["line_items"],
+        }
+      );
+      const lineItems = sessionWithLineItems.line_items;
+
+      if (!lineItems) return res.status(500).send("Internal Server Error");
+
+      try {
+        // Save donation data to the db here
+        console.log("Fullfill the order with custom logic");
+        console.log("data", lineItems.data);
+        console.log(
+          "customer email",
+          (event.data.object as any).customer_details.email
+        );
+        console.log("created", (event.data.object as any).created);
+      } catch (error) {
+        console.log("Handling when you're unable to save an order");
+      }
+    }
+
+    res.status(200).end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json("Internal Server Error");
   }
 }

@@ -3,33 +3,11 @@ import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FaqSchema, faqSchema } from "@/src/lib/types";
+import { faqData } from "@/src/lib/data";
 
 type Props = {};
 
 const FAQ = (props: Props) => {
-  const data = [
-    {
-      question: "What is meditation?",
-      answer:
-        "Meditation is a practice that involves focusing the mind and eliminating distractions to achieve a state of mental clarity, relaxation, and heightened awareness. It often involves techniques such as mindfulness, concentration, and deep breathing.",
-    },
-    {
-      question: "Why should I meditate?",
-      answer:
-        "Meditation offers numerous benefits, including stress reduction, improved focus, enhanced emotional well-being, and a greater sense of inner peace. Regular practice can contribute to overall mental and physical health.",
-    },
-    {
-      question: "How do I start meditating?",
-      answer:
-        "Begin by finding a quiet and comfortable space. Choose a meditation technique that suits you, such as mindfulness, guided meditation, or loving-kindness meditation. Start with short sessions and gradually increase the duration as you become more comfortable.",
-    },
-    {
-      question: "Can meditation help with stress?",
-      answer:
-        "Yes, meditation is widely recognized for its ability to reduce stress. By calming the mind and promoting relaxation, meditation can help lower stress levels, improve coping mechanisms, and enhance overall resilience to life's challenges.",
-    },
-  ];
-
   return (
     <div className="max-w-screen-xl mx-auto px-5 min-h-sceen">
       <div className="flex flex-col items-center">
@@ -39,8 +17,12 @@ const FAQ = (props: Props) => {
         </p>
       </div>
       <div className="grid divide-y divide-neutral-200 w-full mx-auto mt-8">
-        {data.map((faq, index) => (
-          <AccordianItem key={index} question={faq.question} answer={faq.answer} />
+        {faqData.map((faq, index) => (
+          <AccordianItem
+            key={index}
+            question={faq.question}
+            answer={faq.answer}
+          />
         ))}
         <FaqForm />
       </div>
