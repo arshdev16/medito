@@ -7,7 +7,7 @@ const RecentDonations = (props: Props) => {
   const data = getRecentDonations();
 
   return (
-    <div className="h-56 overflow-y-scroll">
+    <div className="h-56 overflow-y-scroll mx-6">
       {data.length !== 0 ? (
         data.map((data, index) => (
           <div key={index} className="flex my-5 w-full max-w-sm overflow-hidden bg-white rounded-lg shadow-md dark:bg-gray-800">
